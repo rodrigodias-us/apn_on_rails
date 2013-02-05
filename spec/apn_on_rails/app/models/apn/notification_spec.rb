@@ -35,7 +35,7 @@ describe APN::Notification do
     
     it 'should return the necessary JSON for Apple' do
       noty = APN::Notification.first
-      noty.to_apple_json.should == %{{"typ":"1","aps":{"badge":5,"sound":"my_sound.aiff","alert":"Hello!"}}}
+      noty.to_apple_json.should == %{{"aps":{"alert":"Hello!","badge":5,"sound":"my_sound.aiff"},"typ":"1"}}
     end
     
   end
@@ -45,7 +45,7 @@ describe APN::Notification do
     it 'should create a binary message to be sent to Apple' do
       noty = APN::Notification.first
       noty.custom_properties = nil
-      noty.device = DeviceFactory.new(:token => '5gxadhy6 6zmtxfl6 5zpbcxmw ez3w7ksf qscpr55t trknkzap 7yyt45sc g6jrw7qz')
+      noty.device = DeviceFactory.new(:token => '9eebf98d 02a41a4d 93e20f53 16341b1a 81528bad 86059d9e 17f373b1 4e555527')
       noty.message_for_sending.should == fixture_value('message_for_sending.bin')
     end
     

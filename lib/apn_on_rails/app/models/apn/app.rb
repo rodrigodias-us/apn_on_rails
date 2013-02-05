@@ -39,24 +39,24 @@ class APN::App < APN::Base
 
   def self.send_notifications_for_cert(the_cert, app_id)
     # unless self.unsent_notifications.nil? || self.unsent_notifications.empty?
-      if (app_id == nil)
-        conditions = "app_id is null"
-      else
-        conditions = ["app_id = ?", app_id]
-      end
-      begin
-        APN::Connection.open_for_delivery({:cert => the_cert}) do |conn, sock|
-          APN::Device.find_each(:conditions => conditions) do |dev|
-            dev.unsent_notifications.each do |noty|
-              conn.write(noty.message_for_sending)
-              noty.sent_at = Time.now
-              noty.save
-            end
+    if (app_id == nil)
+      conditions = "app_id is null"
+    else
+      conditions = ["app_id = ?", app_id]
+    end
+    begin
+      APN::Connection.open_for_delivery({:cert => the_cert}) do |conn, sock|
+        APN::Device.find_each(:conditions => conditions) do |dev|
+          dev.unsent_notifications.each do |noty|
+            conn.write(noty.message_for_sending)
+            noty.sent_at = Time.now
+            noty.save
           end
         end
-      rescue Exception => e
-        log_connection_exception(e)
       end
+    rescue Exception => e
+      log_connection_exception(e)
+    end
     # end
   end
 
@@ -66,14 +66,14 @@ class APN::App < APN::Base
       return
     end
     unless self.unsent_group_notifications.nil? || self.unsent_group_notifications.empty?
-      APN::Connection.open_for_delivery({:cert => self.cert}) do |conn, sock|
-        unsent_group_notifications.each do |gnoty|
-          gnoty.devices.find_each do |device|
+      unsent_group_notifications.each do |gnoty|
+        gnoty.devices.find_each do |device|
+          APN::Connection.open_for_delivery({:cert => self.cert}) do |conn, sock|
             conn.write(gnoty.message_for_sending(device))
           end
-          gnoty.sent_at = Time.now
-          gnoty.save
         end
+        gnoty.sent_at = Time.now
+        gnoty.save
       end
     end
   end
@@ -84,13 +84,13 @@ class APN::App < APN::Base
       return
     end
     unless gnoty.nil?
-      APN::Connection.open_for_delivery({:cert => self.cert}) do |conn, sock|
-        gnoty.devices.find_each do |device|
+      gnoty.devices.find_each do |device|
+        APN::Connection.open_for_delivery({:cert => self.cert}) do |conn, sock|
           conn.write(gnoty.message_for_sending(device))
         end
-        gnoty.sent_at = Time.now
-        gnoty.save
       end
+      gnoty.sent_at = Time.now
+      gnoty.save
     end
   end
 
